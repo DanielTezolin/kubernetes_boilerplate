@@ -1,0 +1,8 @@
+- hosts: control_plane
+  name: Setup kubernetes master
+  roles:
+    - setup
+    - docker
+    - kubernetes
+  tasks:
+    - import_tasks: roles/kubernetes/tasks/run_create_cluster.yml

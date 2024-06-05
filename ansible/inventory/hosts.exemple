@@ -1,0 +1,13 @@
+[control_plane]
+control_public_ip
+
+[workers_k8s]
+worker1_private_ip
+worker2_private_ip
+
+[all:vars]
+ansible_ssh_private_key_file='/ssh/key/path/host.key'
+ansible_user=admin
+
+[workers_k8s:vars]
+ansible_ssh_common_args='-o ProxyCommand="ssh admin@control_public_ip -i /ssh/key/path/host.key -W %h:%p"'

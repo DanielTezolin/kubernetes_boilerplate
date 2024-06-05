@@ -1,0 +1,8 @@
+- hosts: workers_k8s
+  name: Setup kubernetes workers
+  roles:
+    - setup
+    - docker
+    - kubernetes
+  tasks:
+    - import_tasks: roles/kubernetes/tasks/run_start_workers.yml

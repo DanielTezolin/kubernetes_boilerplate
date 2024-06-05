@@ -1,0 +1,63 @@
+- name: Baixar imagens do Kubernetes
+  become: true
+  command: kubeadm config images pull
+
+- name: Inicializar cluster Kubernetes
+  become: true
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  register: kubeadm_init
+
+- name: Criar diretório .kube para o usuário atual
+  become: true
+  file:
+    path: /home/{{ ansible_user }}/.kube
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Copiar arquivo de configuração do kubeconfig
+  become: true
+  command: cp /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+
+- name: Ajustar permissões do arquivo de configuração
+  become: true
+  file:
+    path: /home/{{ ansible_user }}/.kube/config
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: Aguardar 30 segundos para garantir que o servidor API esteja operacional
+  wait_for:
+    timeout: 30
+
+- name: Aplicar rede do pod (Flannel)
+  become: true
+  command: kubectl create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  environment:
+    KUBECONFIG: /home/{{ ansible_user }}/.kube/config
+
+- name: Capturar o token de join do kubeadm
+  become: true
+  command: kubeadm token create --print-join-command
+  register: kubeadm_join_command
+
+- name: Salvar o token de join em um arquivo
+  become: true
+  copy:
+    content: "{{ kubeadm_join_command.stdout }}"
+    dest: /home/{{ ansible_user }}/kubeadm_join_command.txt
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: Salvar o token de join no host local
+  fetch:
+    src: /home/{{ ansible_user }}/kubeadm_join_command.txt
+    dest: ./kubeadm_join_command.txt
+    flat: yes
+
+- name: Imprimir o token de join
+  become: true
+  debug:
+    msg: "Token de join do kubeadm: {{ kubeadm_join_command.stdout }}"

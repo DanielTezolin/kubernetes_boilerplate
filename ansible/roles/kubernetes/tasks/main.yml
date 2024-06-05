@@ -1,0 +1,66 @@
+- name: Atualizar a lista de pacotes
+  become: true
+  apt:
+    update_cache: yes
+
+- name: Instalar pacotes necessários
+  become: true
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+
+- name: Criar diretório para keyrings do apt se não existir
+  become: true
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Baixar a chave pública de assinatura do Kubernetes
+  become: true
+  command: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key -o /tmp/kubernetes-apt-keyring.gpg
+
+- name: Converter chave pública de assinatura para formato gpg
+  become: true
+  command: gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-apt-keyring.gpg
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Adicionar repositório Kubernetes
+  become: true
+  copy:
+    content: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
+    dest: /etc/apt/sources.list.d/kubernetes.list
+
+- name: Atualizar a lista de pacotes novamente
+  become: true
+  apt:
+    update_cache: yes
+
+- name: Instalar kubelet, kubeadm e kubectl
+  become: true
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+
+- name: Fixar versões do kubelet, kubeadm e kubectl
+  become: true
+  command: sudo apt-mark hold kubelet kubeadm kubectl
+
+- name: Desabilitar swap
+  become: true
+  command: swapoff -a
+
+- name: Comentar entrada do swap no fstab
+  become: true
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\\bswap\\b.*)$'
+    replace: '#\\1'

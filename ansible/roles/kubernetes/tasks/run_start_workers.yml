@@ -1,0 +1,13 @@
+- name: Carregar o token de join do kubeadm do arquivo local
+  local_action:
+    module: slurp
+    src: ./kubeadm_join_command.txt
+  register: join_token_content
+
+- name: Definir o comando de join como uma variável
+  set_fact:
+    kubeadm_join_command: "{{ join_token_content['content'] | b64decode }}"
+
+- name: Executar o comando de join no worker
+  become: true
+  command: "{{ kubeadm_join_command }}"

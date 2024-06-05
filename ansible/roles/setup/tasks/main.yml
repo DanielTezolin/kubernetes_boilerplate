@@ -1,0 +1,17 @@
+- name: Update system
+  become: true
+  apt:
+    update_cache: yes
+
+- name: Criar arquivo hosts se não existir
+  become: true
+  file:
+    path: /etc/hosts
+    state: touch
+
+- name: Garantir que o hostname está resolvível
+  become: true
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_host }} {{ inventory_hostname }}"
+    state: present
