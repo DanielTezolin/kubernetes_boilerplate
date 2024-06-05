@@ -43,6 +43,8 @@ terraform.rc
 .DS_Store
 
 ### Ansible ###
+# Ignore join command
+ansible/kubeadm_join_command.txt
 
 # Ignore cache files
 *.retry
