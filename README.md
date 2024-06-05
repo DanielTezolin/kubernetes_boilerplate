@@ -58,7 +58,7 @@ kubernetes
 ```
 
 ## Diagrama AWS
-![Diagrama](https://diagrams.helpful.dev/d/d:BtRzirvC)
+![Diagrama](https://raw.githubusercontent.com/DanielTezolin/kubernetes_boilerplate/8465a2cde45b6e42aa0fe0887172ae361ddc16f4/terraform/modules/diagrama.svg)
 
 ## Pré-requisitos
 
