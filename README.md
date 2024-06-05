@@ -147,7 +147,3 @@ cd terraform/environments/dev
 ## Contribuição
 
 Sinta-se à vontade para contribuir com este projeto. Crie um fork, adicione suas melhorias e abra um pull request.
-
-## Licença
-
-Este projeto está licenciado sob a [MIT License](LICENSE).
